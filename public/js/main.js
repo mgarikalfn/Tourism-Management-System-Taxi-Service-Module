@@ -21,47 +21,6 @@ function login() {
     });
 }
 
-// 2. Load Internal Taxis (Provider functionality)
-function loadTaxis() {
-    fetch(`${API}/taxi/list_taxis.php`)
-    .then(res => res.json())
-    .then(data => {
-        const container = document.getElementById('taxiList');
-        container.innerHTML = "";
-        data.data.forEach(t => {
-            container.innerHTML += `
-                <div class="item-card">
-                    <div>
-                        <strong>${t.vehicle_type}</strong> (ID: ${t.id})<br>
-                        <small>Driver: ${t.driver_name}</small>
-                    </div>
-                    <div><span class="badge">$${t.price_per_km}/km</span></div>
-                </div>`;
-        });
-    });
-}
-
-// 3. Create Booking
-function bookTaxi() {
-    const payload = {
-        taxi_id: document.getElementById('taxiId').value,
-        pickup_location: document.getElementById('pickup').value,
-        dropoff_location: document.getElementById('dropoff').value
-    };
-
-    fetch(`${API}/booking/create_booking.php`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-    })
-    .then(res => res.json())
-    .then(data => {
-        const msg = document.getElementById('bookMsg');
-        msg.innerText = data.message;
-        msg.style.color = data.success ? "green" : "red";
-        if(data.success) loadBookings();
-    });
-}
 
 // 4. View Booking History
 function loadBookings() {
@@ -92,4 +51,81 @@ function consumeExternal(type) {
 
 function logout() {
     fetch(`${API}/auth/logout.php`).then(() => window.location.reload());
+}
+
+// Function called when user clicks "Book Now" on a taxi card
+function selectTaxi(id, name) {
+    // 1. Store the ID in the hidden input
+    document.getElementById('taxiId').value = id;
+    
+    // 2. Update the UI to show what was selected
+    const banner = document.getElementById('selectionBanner');
+    const displayName = document.getElementById('displayTaxiName');
+    const confirmBtn = document.getElementById('confirmBtn');
+    
+    banner.style.display = 'block';
+    displayName.innerText = name;
+    
+    // 3. Enable the button
+    confirmBtn.disabled = false;
+    confirmBtn.innerText = "Confirm Booking for " + name;
+
+    // 4. Smooth scroll to form
+    document.getElementById('booking-section').scrollIntoView({behavior: 'smooth'});
+}
+
+// Updated loadTaxis to use the select button
+function loadTaxis() {
+    fetch(`${API}/taxi/list_taxis.php`)
+    .then(res => res.json())
+    .then(data => {
+        const container = document.getElementById('taxiList');
+        container.innerHTML = "";
+        data.data.forEach(t => {
+            container.innerHTML += `
+                <div class="item-card">
+                    <div>
+                        <strong>${t.vehicle_type}</strong><br>
+                        <small>Driver: ${t.driver_name} | $${t.price_per_km}/km</small>
+                    </div>
+                    <button class="btn-select" onclick="selectTaxi(${t.id}, '${t.vehicle_type}')">
+                        Select
+                    </button>
+                </div>`;
+        });
+    });
+}
+
+function bookTaxi() {
+    const payload = {
+        taxi_id: document.getElementById('taxiId').value,
+        pickup_location: document.getElementById('pickup').value,
+        dropoff_location: document.getElementById('dropoff').value,
+        pickup_time: document.getElementById('pickup_time').value // The date picker value
+    };
+
+    if(!payload.pickup_time) {
+        alert("Please select a date and time");
+        return;
+    }
+
+    fetch(`${API}/booking/create_booking.php`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+        const msg = document.getElementById('bookMsg');
+        msg.innerText = data.message;
+        if(data.success) {
+            msg.style.color = "green";
+            loadBookings(); // Refresh history
+            // Reset form
+            document.getElementById('selectionBanner').style.display = 'none';
+            document.getElementById('confirmBtn').disabled = true;
+        } else {
+            msg.style.color = "red";
+        }
+    });
 }

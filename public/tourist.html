@@ -39,14 +39,24 @@
             </div>
         </div>
 
-        <div class="card">
-            <h3>📍 Book a Ride</h3>
-            <input type="number" id="taxiId" placeholder="Taxi ID (from list)">
-            <input type="text" id="pickup" placeholder="Pickup Point">
-            <input type="text" id="dropoff" placeholder="Drop-off Point">
-            <button class="btn-main" onclick="bookTaxi()">Confirm Booking</button>
-            <p id="bookMsg" class="status-text"></p>
-        </div>
+        <div class="card" id="booking-section">
+    <h3>📍 Book a Ride</h3>
+    
+    <div id="selectionBanner" class="selected-taxi-banner">
+        <span>Selected Taxi: </span><strong id="displayTaxiName">None</strong>
+    </div>
+
+    <input type="hidden" id="taxiId">
+
+    <label for="pickup_time">Pickup Date & Time:</label>
+    <input type="datetime-local" id="pickup_time">
+
+    <input type="text" id="pickup" placeholder="Pickup Location (e.g. Airport)">
+    <input type="text" id="dropoff" placeholder="Drop-off Location (e.g. Hotel)">
+    
+    <button class="btn-main" id="confirmBtn" onclick="bookTaxi()" disabled>Select a Taxi First</button>
+    <p id="bookMsg" class="status-text"></p>
+</div>
     </div>
 
     <div class="grid external-section">

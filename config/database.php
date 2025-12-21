@@ -1,7 +1,7 @@
 <?php
 // Database credentials
 $host = "localhost";
-$db_name = "tourism_db"; // replace with your DB name
+$db_name = "tourism_db"; 
 $username = "root";
 $password = ""; // leave empty if root has no password
 

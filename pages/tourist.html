@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tourist Gateway | Taxi Services</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="logo">
+                <i class="fas fa-car logo-icon"></i>
+                <span>Tourist Gateway</span>
+            </div>
+            <div class="nav-links">
+                <a href="tourist.html" class="nav-link active"><i class="fas fa-taxi"></i> Taxis</a>
+                <a href="#" class="nav-link" onclick="ExternalServices.consumeHotel()"><i class="fas fa-hotel"></i> Hotels</a>
+                <a href="#" class="nav-link" onclick="ExternalServices.consumeRestaurant()"><i class="fas fa-utensils"></i> Restaurants</a>
+                <div class="user-info">
+                    <span id="userEmail"></span>
+                    <button class="btn btn-danger btn-sm" onclick="SessionManager.logout()">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Explore Ethiopia with Ease</h1>
+            <p>Your one-stop destination for seamless travel experiences across Ethiopia</p>
+            <div class="flex justify-center gap-3 mt-4">
+                <button class="btn btn-outline" onclick="TaxiService.loadTaxis()">
+                    <i class="fas fa-sync-alt"></i> Refresh Taxis
+                </button>
+                <button class="btn btn-secondary" onclick="BookingService.loadUserBookings()">
+                    <i class="fas fa-history"></i> View History
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="grid grid-auto mb-6">
+            <!-- Available Taxis -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-taxi"></i> Available Taxis</h3>
+                    <p class="card-subtitle">Select a taxi for your journey</p>
+                </div>
+                <div id="taxiList" class="mb-3">
+                    <p class="text-center text-gray-400">Loading available taxis...</p>
+                </div>
+                <button class="btn btn-primary btn-full" onclick="TaxiService.loadTaxis()">
+                    <i class="fas fa-sync-alt"></i> Refresh Taxi List
+                </button>
+            </div>
+
+            <!-- Booking Form -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-calendar-check"></i> Book a Ride</h3>
+                    <p class="card-subtitle">Fill in your travel details</p>
+                </div>
+                
+                <!-- Selected Taxi Banner -->
+                <div id="selectionBanner" class="hidden bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500 mb-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="text-sm text-gray-600">Selected Taxi:</span>
+                            <strong class="block text-lg" id="selectedTaxiName"></strong>
+                        </div>
+                        <button class="btn btn-sm" onclick="document.getElementById('selectionBanner').classList.add('hidden')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Hidden Taxi ID -->
+                <input type="hidden" id="taxiId">
+                
+                <!-- Booking Form -->
+                <div class="space-y-4">
+                    <div class="form-group">
+                        <label class="form-label" for="pickup_time"><i class="fas fa-clock"></i> Pickup Date & Time</label>
+                        <input type="datetime-local" id="pickup_time" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="pickup"><i class="fas fa-map-marker-alt"></i> Pickup Location</label>
+                        <input type="text" id="pickup" class="form-control" placeholder="Enter pickup address" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="dropoff"><i class="fas fa-flag-checkered"></i> Drop-off Location</label>
+                        <input type="text" id="dropoff" class="form-control" placeholder="Enter destination" required>
+                    </div>
+                    
+                    <button id="confirmBtn" class="btn btn-success btn-full" onclick="TaxiService.bookTaxi()" disabled>
+                        <i class="fas fa-check-circle"></i> Confirm Booking
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Partner Services -->
+        <div class="grid grid-2 gap-4 mb-6">
+            <div class="card" style="border-top: 4px solid #f59e0b;">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-hotel"></i> Partner Hotels</h3>
+                    <p class="card-subtitle">Find comfortable accommodations across Ethiopia</p>
+                </div>
+                <p>Access exclusive hotel deals through our partnership with Group 2</p>
+                <button class="btn btn-warning btn-full mt-3" onclick="ExternalServices.consumeHotel()">
+                    <i class="fas fa-external-link-alt"></i> Browse Hotels
+                </button>
+            </div>
+            
+            <div class="card" style="border-top: 4px solid #ef4444;">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-utensils"></i> Partner Restaurants</h3>
+                    <p class="card-subtitle">Discover authentic Ethiopian cuisine</p>
+                </div>
+                <p>Explore restaurant menus and make reservations through Group 3</p>
+                <button class="btn btn-danger btn-full mt-3" onclick="ExternalServices.consumeRestaurant()">
+                    <i class="fas fa-external-link-alt"></i> Browse Restaurants
+                </button>
+            </div>
+        </div>
+
+        <!-- Booking History -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-history"></i> My Booking History</h3>
+                <p class="card-subtitle">View all your past and current bookings</p>
+            </div>
+            <div id="bookingList">
+                <p class="text-center text-gray-400">Loading booking history...</p>
+            </div>
+            <button class="btn btn-secondary btn-full mt-3" onclick="BookingService.loadUserBookings()">
+                <i class="fas fa-sync-alt"></i> Refresh History
+            </button>
+        </div>
+    </div>
+
+    <script src="../js/main.js"></script>
+</body>
+</html>

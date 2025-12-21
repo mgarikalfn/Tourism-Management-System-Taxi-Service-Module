@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tourist Gateway | Group 4</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav>
+    <h2>🌍 Tourist Gateway</h2>
+    <div class="nav-links">
+        <span id="userEmail"></span>
+        <button onclick="logout()">Logout</button>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="hero">
+        <h1>Welcome to Ethiopia!</h1>
+        <p>Book your transport, hotels, and restaurants all in one place.</p>
+    </div>
+
+    <div class="grid">
+        <div class="card" id="loginCard">
+            <h3>🔑 Tourist Login</h3>
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="password" placeholder="Password">
+            <button class="btn-main" onclick="login()">Sign In</button>
+            <p id="loginMsg" class="error-text"></p>
+        </div>
+
+        <div class="card">
+            <h3>🚖 Available Taxis</h3>
+            <button class="btn-main secondary" onclick="loadTaxis()">Refresh List</button>
+            <div id="taxiList" class="item-list">
+                <p class="placeholder-text">Click load to see taxis</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>📍 Book a Ride</h3>
+            <input type="number" id="taxiId" placeholder="Taxi ID (from list)">
+            <input type="text" id="pickup" placeholder="Pickup Point">
+            <input type="text" id="dropoff" placeholder="Drop-off Point">
+            <button class="btn-main" onclick="bookTaxi()">Confirm Booking</button>
+            <p id="bookMsg" class="status-text"></p>
+        </div>
+    </div>
+
+    <div class="grid external-section">
+        <div class="card hotel-card">
+            <h3>🏨 External Hotels</h3>
+            <p>Consuming Group 2 API...</p>
+            <button class="btn-main hotel-btn" onclick="consumeExternal('Hotel')">Browse Hotels</button>
+        </div>
+        <div class="card restaurant-card">
+            <h3>🍴 External Restaurants</h3>
+            <p>Consuming Group 3 API...</p>
+            <button class="btn-main restaurant-btn" onclick="consumeExternal('Restaurant')">Browse Food</button>
+        </div>
+    </div>
+
+    <div class="card history-card">
+        <h3>📜 My Booking History</h3>
+        <button class="btn-history" onclick="loadBookings()">Update My History</button>
+        <div id="bookingList" class="history-list"></div>
+    </div>
+</div>
+
+<script src="js/main.js"></script>
+</body>
+</html>

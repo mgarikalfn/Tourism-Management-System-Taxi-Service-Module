@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tourist Gateway | Taxi Services</title>
+    <title>Tourist Gateway | Travel Services</title>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -12,15 +12,28 @@
     <nav class="navbar">
         <div class="navbar-content">
             <div class="logo">
-                <i class="fas fa-car logo-icon"></i>
+                <i class="fas fa-globe-africa logo-icon"></i>
                 <span>Tourist Gateway</span>
             </div>
             <div class="nav-links">
-                <a href="tourist.html" class="nav-link active"><i class="fas fa-taxi"></i> Taxis</a>
-                <a href="#" class="nav-link" onclick="ExternalServices.consumeHotel()"><i class="fas fa-hotel"></i> Hotels</a>
-                <a href="#" class="nav-link" onclick="ExternalServices.consumeRestaurant()"><i class="fas fa-utensils"></i> Restaurants</a>
+                <a href="tourist.html" class="nav-link active" id="navTaxis"><i class="fas fa-taxi"></i> Taxis</a>
+                <a href="#" class="nav-link" id="navHotels" onclick="showHotelDiscovery()"><i class="fas fa-hotel"></i> Hotels</a>
+                <a href="#" class="nav-link" id="navRestaurants" onclick="showRestaurantDiscovery()"><i class="fas fa-utensils"></i> Restaurants</a>
+                
+                <!-- Dashboard link will be inserted here for managers/admins -->
+                
                 <div class="user-info">
-                    <span id="userEmail"></span>
+                    <span id="userEmail" class="user-badge">
+                        <i class="fas fa-user"></i>
+                        <span id="userEmailText"></span>
+                    </span>
+                    
+                    <!-- Dashboard button in user info (alternative) -->
+                    <button id="userDashboardBtn" class="btn btn-warning btn-sm" style="display: none;" 
+                            onclick="window.location.href='manager.html'" title="Go to Manager Dashboard">
+                        <i class="fas fa-chart-line"></i>
+                    </button>
+                    
                     <button class="btn btn-danger btn-sm" onclick="SessionManager.logout()">
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </button>
@@ -47,108 +60,671 @@
 
     <!-- Main Content -->
     <div class="container">
-        <div class="grid grid-auto mb-6">
-            <!-- Available Taxis -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title"><i class="fas fa-taxi"></i> Available Taxis</h3>
-                    <p class="card-subtitle">Select a taxi for your journey</p>
+        <!-- Taxi Services Section -->
+        <div id="taxi-services" class="main-service-section">
+            <div class="grid grid-auto mb-6">
+                <!-- Available Taxis -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-taxi"></i> Available Taxis</h3>
+                        <p class="card-subtitle">Select a taxi for your journey</p>
+                    </div>
+                    <div id="taxiList" class="mb-3">
+                        <p class="text-center text-gray-400">Loading available taxis...</p>
+                    </div>
+                    <button class="btn btn-primary btn-full" onclick="TaxiService.loadTaxis()">
+                        <i class="fas fa-sync-alt"></i> Refresh Taxi List
+                    </button>
                 </div>
-                <div id="taxiList" class="mb-3">
-                    <p class="text-center text-gray-400">Loading available taxis...</p>
-                </div>
-                <button class="btn btn-primary btn-full" onclick="TaxiService.loadTaxis()">
-                    <i class="fas fa-sync-alt"></i> Refresh Taxi List
-                </button>
-            </div>
 
-            <!-- Booking Form -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title"><i class="fas fa-calendar-check"></i> Book a Ride</h3>
-                    <p class="card-subtitle">Fill in your travel details</p>
-                </div>
-                
-                <!-- Selected Taxi Banner -->
-                <div id="selectionBanner" class="hidden bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500 mb-4">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <span class="text-sm text-gray-600">Selected Taxi:</span>
-                            <strong class="block text-lg" id="selectedTaxiName"></strong>
+                <!-- Taxi Booking Form -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-calendar-check"></i> Book a Ride</h3>
+                        <p class="card-subtitle">Fill in your travel details</p>
+                    </div>
+                    
+                    <!-- Selected Taxi Banner -->
+                    <div id="selectionBanner" class="hidden bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500 mb-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="text-sm text-gray-600">Selected Taxi:</span>
+                                <strong class="block text-lg" id="selectedTaxiName"></strong>
+                            </div>
+                            <button class="btn btn-sm" onclick="document.getElementById('selectionBanner').classList.add('hidden')">
+                                <i class="fas fa-times"></i>
+                            </button>
                         </div>
-                        <button class="btn btn-sm" onclick="document.getElementById('selectionBanner').classList.add('hidden')">
-                            <i class="fas fa-times"></i>
+                    </div>
+                    
+                    <!-- Hidden Taxi ID -->
+                    <input type="hidden" id="taxiId">
+                    
+                    <!-- Booking Form -->
+                    <div class="space-y-4">
+                        <div class="form-group">
+                            <label class="form-label" for="pickup_time"><i class="fas fa-clock"></i> Pickup Date & Time</label>
+                            <input type="datetime-local" id="pickup_time" class="form-control" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="pickup"><i class="fas fa-map-marker-alt"></i> Pickup Location</label>
+                            <input type="text" id="pickup" class="form-control" placeholder="Enter pickup address" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="dropoff"><i class="fas fa-flag-checkered"></i> Drop-off Location</label>
+                            <input type="text" id="dropoff" class="form-control" placeholder="Enter destination" required>
+                        </div>
+                        
+                        <button id="confirmBtn" class="btn btn-success btn-full" onclick="TaxiService.bookTaxi()" disabled>
+                            <i class="fas fa-check-circle"></i> Confirm Booking
                         </button>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Hotel Discovery Section -->
+        <div class="card" id="hotel-discovery" style="display:none; margin-top: 25px; border-top: 4px solid #f59e0b;">
+            <div class="card-header">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <h3 class="card-title"><i class="fas fa-hotel"></i> Available Hotels</h3>
+                        <p class="card-subtitle">Find and book accommodations across Ethiopia</p>
+                    </div>
+                    <button class="btn btn-secondary" style="width:auto" onclick="hideHotelDiscovery()">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <div class="flex gap-2">
+                    <input type="text" id="hotelSearch" class="form-control" placeholder="Search hotels..." 
+                           onkeyup="searchHotels()">
+                    <select id="hotelPriceRange" class="form-control" style="width: 200px;" onchange="filterHotels()">
+                        <option value="">All Price Ranges</option>
+                        <option value="$">Budget ($)</option>
+                        <option value="$$">Moderate ($$)</option>
+                        <option value="$$$">Luxury ($$$)</option>
+                    </select>
+                    <select id="hotelRating" class="form-control" style="width: 200px;" onchange="filterHotels()">
+                        <option value="0">All Ratings</option>
+                        <option value="4">4+ Stars</option>
+                        <option value="3">3+ Stars</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="hotel-grid" class="grid grid-3" style="margin-top:15px;">
+                <p class="text-center text-gray-400 col-span-3">Loading hotels...</p>
+            </div>
+            
+            <div class="mt-4 text-center">
+                <button class="btn btn-outline" onclick="loadMoreHotels()">
+                    <i class="fas fa-plus"></i> Load More Hotels
+                </button>
+            </div>
+        </div>
+
+        <!-- Hotel Booking Form -->
+        <div id="hotel-booking-form" class="card" style="display:none; margin-top: 20px; border-top: 4px solid #f59e0b;">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-calendar-alt"></i> Confirm Hotel Reservation</h3>
+                <p class="card-subtitle">Complete your hotel booking</p>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-500">
+                    <p class="text-sm text-gray-600">Hotel:</p>
+                    <strong class="text-lg" id="selected-hotel-name"></strong>
+                    <p class="text-sm mt-1" id="selected-hotel-address"></p>
+                </div>
                 
-                <!-- Hidden Taxi ID -->
-                <input type="hidden" id="taxiId">
+                <input type="hidden" id="ext-hotel-id">
                 
-                <!-- Booking Form -->
-                <div class="space-y-4">
+                <div class="grid grid-2 gap-4">
                     <div class="form-group">
-                        <label class="form-label" for="pickup_time"><i class="fas fa-clock"></i> Pickup Date & Time</label>
-                        <input type="datetime-local" id="pickup_time" class="form-control" required>
+                        <label class="form-label" for="check-in"><i class="fas fa-sign-in-alt"></i> Check-in Date</label>
+                        <input type="date" id="check-in" class="form-control" required>
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label" for="pickup"><i class="fas fa-map-marker-alt"></i> Pickup Location</label>
-                        <input type="text" id="pickup" class="form-control" placeholder="Enter pickup address" required>
+                        <label class="form-label" for="check-out"><i class="fas fa-sign-out-alt"></i> Check-out Date</label>
+                        <input type="date" id="check-out" class="form-control" required>
+                    </div>
+                </div>
+                
+                <div class="grid grid-3 gap-4">
+                    <div class="form-group">
+                        <label class="form-label" for="hotel-guests"><i class="fas fa-users"></i> Guests</label>
+                        <select id="hotel-guests" class="form-control" required>
+                            <option value="1">1 Guest</option>
+                            <option value="2" selected>2 Guests</option>
+                            <option value="3">3 Guests</option>
+                            <option value="4">4 Guests</option>
+                            <option value="5+">5+ Guests</option>
+                        </select>
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label" for="dropoff"><i class="fas fa-flag-checkered"></i> Drop-off Location</label>
-                        <input type="text" id="dropoff" class="form-control" placeholder="Enter destination" required>
+                        <label class="form-label" for="hotel-rooms"><i class="fas fa-bed"></i> Rooms</label>
+                        <select id="hotel-rooms" class="form-control" required>
+                            <option value="1">1 Room</option>
+                            <option value="2">2 Rooms</option>
+                            <option value="3">3 Rooms</option>
+                        </select>
                     </div>
                     
-                    <button id="confirmBtn" class="btn btn-success btn-full" onclick="TaxiService.bookTaxi()" disabled>
-                        <i class="fas fa-check-circle"></i> Confirm Booking
+                    <div class="form-group">
+                        <label class="form-label" for="room-type"><i class="fas fa-star"></i> Room Type</label>
+                        <select id="room-type" class="form-control" required>
+                            <option value="standard">Standard</option>
+                            <option value="deluxe">Deluxe</option>
+                            <option value="suite">Suite</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="hotel-requests"><i class="fas fa-sticky-note"></i> Special Requests (Optional)</label>
+                    <textarea id="hotel-requests" class="form-control" rows="3" placeholder="Early check-in, airport shuttle, etc..."></textarea>
+                </div>
+                
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-600">Estimated Total</p>
+                            <strong class="text-xl" id="hotel-total-price">$0.00</strong>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm text-gray-600">Per Night</p>
+                            <span id="hotel-night-price">$0.00</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex gap-3">
+                    <button class="btn btn-secondary btn-full" onclick="cancelHotelBooking()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button class="btn btn-warning btn-full" onclick="submitHotelBooking()">
+                        <i class="fas fa-check-circle"></i> Book Hotel
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- Partner Services -->
-        <div class="grid grid-2 gap-4 mb-6">
-            <div class="card" style="border-top: 4px solid #f59e0b;">
-                <div class="card-header">
-                    <h3 class="card-title"><i class="fas fa-hotel"></i> Partner Hotels</h3>
-                    <p class="card-subtitle">Find comfortable accommodations across Ethiopia</p>
+        <!-- Restaurant Discovery Section -->
+        <div class="card" id="restaurant-discovery" style="display:none; margin-top: 25px; border-top: 4px solid #e67e22;">
+            <div class="card-header">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <h3 class="card-title"><i class="fas fa-utensils"></i> Nearby Restaurants</h3>
+                        <p class="card-subtitle">Discover and book tables at partner restaurants</p>
+                    </div>
+                    <button class="btn btn-secondary" style="width:auto" onclick="hideRestaurantDiscovery()">
+                        <i class="fas fa-times"></i> Close
+                    </button>
                 </div>
-                <p>Access exclusive hotel deals through our partnership with Group 2</p>
-                <button class="btn btn-warning btn-full mt-3" onclick="ExternalServices.consumeHotel()">
-                    <i class="fas fa-external-link-alt"></i> Browse Hotels
-                </button>
             </div>
             
-            <div class="card" style="border-top: 4px solid #ef4444;">
-                <div class="card-header">
-                    <h3 class="card-title"><i class="fas fa-utensils"></i> Partner Restaurants</h3>
-                    <p class="card-subtitle">Discover authentic Ethiopian cuisine</p>
+            <div class="mb-4">
+                <div class="flex gap-2">
+                    <input type="text" id="restaurantSearch" class="form-control" placeholder="Search restaurants..." 
+                           onkeyup="searchRestaurants()">
+                    <select id="restaurantCuisine" class="form-control" style="width: 200px;" onchange="filterRestaurants()">
+                        <option value="">All Cuisines</option>
+                        <option value="Ethiopian">Ethiopian</option>
+                        <option value="International">International</option>
+                        <option value="Italian">Italian</option>
+                        <option value="Asian">Asian</option>
+                        <option value="Fast Food">Fast Food</option>
+                    </select>
                 </div>
-                <p>Explore restaurant menus and make reservations through Group 3</p>
-                <button class="btn btn-danger btn-full mt-3" onclick="ExternalServices.consumeRestaurant()">
-                    <i class="fas fa-external-link-alt"></i> Browse Restaurants
+            </div>
+            
+            <div id="restaurant-grid" class="grid grid-3" style="margin-top:15px;">
+                <p class="text-center text-gray-400 col-span-3">Loading restaurants...</p>
+            </div>
+            
+            <div class="mt-4 text-center">
+                <button class="btn btn-outline" onclick="loadMoreRestaurants()">
+                    <i class="fas fa-plus"></i> Load More Restaurants
                 </button>
             </div>
         </div>
 
-        <!-- Booking History -->
+        <!-- Restaurant Booking Form -->
+        <div id="res-booking-form" class="card" style="display:none; margin-top: 20px; border-top: 4px solid #e67e22;">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-calendar-alt"></i> Confirm Table Reservation</h3>
+                <p class="card-subtitle">Complete your restaurant booking</p>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="bg-orange-50 p-4 rounded-lg border-l-4 border-orange-500">
+                    <p class="text-sm text-gray-600">Restaurant:</p>
+                    <strong class="text-lg" id="selected-res-name"></strong>
+                </div>
+                
+                <input type="hidden" id="ext-res-id">
+                
+                <div class="form-group">
+                    <label class="form-label" for="guest-count"><i class="fas fa-users"></i> Number of Guests</label>
+                    <input type="number" id="guest-count" class="form-control" value="2" min="1" max="20">
+                </div>
+                
+                <div class="grid grid-2 gap-4">
+                    <div class="form-group">
+                        <label class="form-label" for="res-date"><i class="fas fa-calendar"></i> Reservation Date</label>
+                        <input type="date" id="res-date" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="res-time"><i class="fas fa-clock"></i> Reservation Time</label>
+                        <select id="res-time" class="form-control" required>
+                            <option value="">Select a time</option>
+                            <option value="18:00">6:00 PM</option>
+                            <option value="18:30">6:30 PM</option>
+                            <option value="19:00">7:00 PM</option>
+                            <option value="19:30">7:30 PM</option>
+                            <option value="20:00">8:00 PM</option>
+                            <option value="20:30">8:30 PM</option>
+                            <option value="21:00">9:00 PM</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="special-requests"><i class="fas fa-sticky-note"></i> Special Requests (Optional)</label>
+                    <textarea id="special-requests" class="form-control" rows="3" placeholder="Any dietary requirements or special requests..."></textarea>
+                </div>
+                
+                <div class="flex gap-3">
+                    <button class="btn btn-secondary btn-full" onclick="cancelReservation()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button class="btn btn-warning btn-full" onclick="submitRestaurantBooking()">
+                        <i class="fas fa-check-circle"></i> Confirm Reservation
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- All Bookings History -->
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title"><i class="fas fa-history"></i> My Booking History</h3>
-                <p class="card-subtitle">View all your past and current bookings</p>
+                <p class="card-subtitle">View all your taxi, hotel, and restaurant bookings</p>
             </div>
-            <div id="bookingList">
-                <p class="text-center text-gray-400">Loading booking history...</p>
+            
+            <!-- Tabs for different booking types -->
+            <div class="tabs mb-4">
+                <button class="tab-btn active" onclick="showBookingTab('taxi')">Taxi Rides</button>
+                <button class="tab-btn" onclick="showBookingTab('hotel')">Hotel Stays</button>
+                <button class="tab-btn" onclick="showBookingTab('restaurant')">Restaurant Reservations</button>
             </div>
-            <button class="btn btn-secondary btn-full mt-3" onclick="BookingService.loadUserBookings()">
-                <i class="fas fa-sync-alt"></i> Refresh History
+            
+            <!-- Taxi Bookings -->
+            <div id="taxi-bookings" class="booking-tab">
+                <div id="bookingList">
+                    <p class="text-center text-gray-400">Loading taxi bookings...</p>
+                </div>
+            </div>
+            
+            <!-- Hotel Bookings -->
+            <div id="hotel-bookings" class="booking-tab" style="display: none;">
+                <div id="hotelBookingList">
+                    <p class="text-center text-gray-400">No hotel bookings yet</p>
+                </div>
+            </div>
+            
+            <!-- Restaurant Bookings -->
+            <div id="restaurant-bookings" class="booking-tab" style="display: none;">
+                <div id="restaurantBookingList">
+                    <p class="text-center text-gray-400">No restaurant reservations yet</p>
+                </div>
+            </div>
+            
+            <button class="btn btn-secondary btn-full mt-3" onclick="refreshAllBookings()">
+                <i class="fas fa-sync-alt"></i> Refresh All Bookings
             </button>
         </div>
     </div>
 
+    <!-- Floating dashboard button -->
+    <div id="floatingDashboard" class="floating-dashboard-btn" style="display: none;">
+        <button onclick="window.location.href='manager.html'" class="btn btn-warning" title="Go to Manager Dashboard">
+            <i class="fas fa-chart-line"></i>
+            <span>Dashboard</span>
+        </button>
+    </div>
+
+    <!-- Service Navigation Tabs -->
+    <div class="service-nav-tabs">
+        <div class="container">
+            <div class="service-tabs">
+                <button class="service-tab active" onclick="showService('taxi')">
+                    <i class="fas fa-taxi"></i>
+                    <span>Taxi Services</span>
+                </button>
+                <button class="service-tab" onclick="showService('hotel')">
+                    <i class="fas fa-hotel"></i>
+                    <span>Hotels</span>
+                </button>
+                <button class="service-tab" onclick="showService('restaurant')">
+                    <i class="fas fa-utensils"></i>
+                    <span>Restaurants</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="../js/main.js"></script>
+    <script>
+        // Service Navigation Functions
+        function showService(service) {
+            // Update navbar active state
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            document.getElementById(`nav${service.charAt(0).toUpperCase() + service.slice(1)}`).classList.add('active');
+            
+            // Update service tabs
+            document.querySelectorAll('.service-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelector(`.service-tab:nth-child(${service === 'taxi' ? 1 : service === 'hotel' ? 2 : 3})`).classList.add('active');
+            
+            // Show/hide service sections
+            const services = ['taxi', 'hotel', 'restaurant'];
+            services.forEach(s => {
+                const element = document.getElementById(`${s}-services`);
+                if (element) element.style.display = s === service ? 'block' : 'none';
+            });
+            
+            if (service === 'hotel') {
+                showHotelDiscovery();
+            } else if (service === 'restaurant') {
+                showRestaurantDiscovery();
+            } else {
+                hideHotelDiscovery();
+                hideRestaurantDiscovery();
+                document.getElementById('hotel-booking-form').style.display = 'none';
+                document.getElementById('res-booking-form').style.display = 'none';
+            }
+        }
+        
+        // Hotel Management Functions
+        function showHotelDiscovery() {
+            document.getElementById('hotel-discovery').style.display = 'block';
+            document.getElementById('navHotels').classList.add('active');
+            
+            // Load hotels if not already loaded
+            if (!window.hotelsLoaded) {
+                loadHotels();
+            }
+            
+            // Smooth scroll to hotel section
+            document.getElementById('hotel-discovery').scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+        
+        function hideHotelDiscovery() {
+            document.getElementById('hotel-discovery').style.display = 'none';
+            document.getElementById('navHotels').classList.remove('active');
+            document.getElementById('hotel-booking-form').style.display = 'none';
+        }
+        
+                // ...existing code...
+        
+                // Restaurant Management Functions
+                function showRestaurantDiscovery() {
+                    document.getElementById('restaurant-discovery').style.display = 'block';
+                    document.getElementById('navRestaurants').classList.add('active');
+                    
+                    // Load restaurants if not already loaded
+                    if (!window.restaurantsLoaded) {
+                        loadRestaurants();
+                    }
+                    
+                    // Smooth scroll to restaurant section
+                    document.getElementById('restaurant-discovery').scrollIntoView({ 
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+                
+                function hideRestaurantDiscovery() {
+                    document.getElementById('restaurant-discovery').style.display = 'none';
+                    document.getElementById('navRestaurants').classList.remove('active');
+                    document.getElementById('res-booking-form').style.display = 'none';
+                }
+                
+                function loadRestaurants() {
+                    // Mock data for restaurants - replace with actual API call
+                    const restaurants = [
+                        { id: 1, name: 'Habesha 2000', cuisine: 'Ethiopian', rating: 4.5, price: '$$', image: '../images/restaurant1.jpg' },
+                        { id: 2, name: 'Mama\'s Kitchen', cuisine: 'International', rating: 4.2, price: '$', image: '../images/restaurant2.jpg' },
+                        { id: 3, name: 'Pizza Palace', cuisine: 'Italian', rating: 4.0, price: '$$', image: '../images/restaurant3.jpg' },
+                        // Add more restaurants as needed
+                    ];
+                    
+                    const grid = document.getElementById('restaurant-grid');
+                    grid.innerHTML = '';
+                    
+                    restaurants.forEach(restaurant => {
+                        const card = document.createElement('div');
+                        card.className = 'card';
+                        card.innerHTML = `
+                            <img src="${restaurant.image}" alt="${restaurant.name}" class="card-img">
+                            <div class="card-body">
+                                <h4 class="card-title">${restaurant.name}</h4>
+                                <p class="card-text">${restaurant.cuisine} • ${restaurant.rating} ⭐ • ${restaurant.price}</p>
+                                <button class="btn btn-primary" onclick="selectRestaurant(${restaurant.id}, '${restaurant.name}')">Book Table</button>
+                            </div>
+                        `;
+                        grid.appendChild(card);
+                    });
+                    
+                    window.restaurantsLoaded = true;
+                }
+                
+                function searchRestaurants() {
+                    const query = document.getElementById('restaurantSearch').value.toLowerCase();
+                    const cards = document.querySelectorAll('#restaurant-grid .card');
+                    cards.forEach(card => {
+                        const name = card.querySelector('.card-title').textContent.toLowerCase();
+                        card.style.display = name.includes(query) ? 'block' : 'none';
+                    });
+                }
+                
+                function filterRestaurants() {
+                    const cuisine = document.getElementById('restaurantCuisine').value;
+                    const cards = document.querySelectorAll('#restaurant-grid .card');
+                    cards.forEach(card => {
+                        const cardCuisine = card.querySelector('.card-text').textContent.split(' • ')[0];
+                        card.style.display = !cuisine || cardCuisine === cuisine ? 'block' : 'none';
+                    });
+                }
+                
+                function loadMoreRestaurants() {
+                    // Implement pagination or load more logic
+                    alert('Loading more restaurants...');
+                }
+                
+                function selectRestaurant(id, name) {
+                    document.getElementById('selected-res-name').textContent = name;
+                    document.getElementById('ext-res-id').value = id;
+                    document.getElementById('res-booking-form').style.display = 'block';
+                    document.getElementById('res-booking-form').scrollIntoView({ behavior: 'smooth' });
+                }
+                
+                function submitRestaurantBooking() {
+                    const guestCount = document.getElementById('guest-count').value;
+                    const date = document.getElementById('res-date').value;
+                    const time = document.getElementById('res-time').value;
+                    const requests = document.getElementById('special-requests').value;
+                    
+                    if (!date || !time) {
+                        alert('Please fill in all required fields.');
+                        return;
+                    }
+                    
+                    // Mock booking submission - replace with actual API call
+                    alert(`Restaurant booking confirmed for ${guestCount} guests on ${date} at ${time}.`);
+                    
+                    // Hide form and refresh bookings
+                    document.getElementById('res-booking-form').style.display = 'none';
+                    refreshAllBookings();
+                }
+                
+                function cancelReservation() {
+                    document.getElementById('res-booking-form').style.display = 'none';
+                }
+                
+                // Hotel Management Functions (similar to restaurant functions)
+                function loadHotels() {
+                    // Mock data for hotels - replace with actual API call
+                    const hotels = [
+                        { id: 1, name: 'Sheraton Addis', address: 'Addis Ababa', rating: 4.5, price: '$$$', image: '../images/hotel1.jpg' },
+                        { id: 2, name: 'Budget Inn', address: 'Addis Ababa', rating: 3.8, price: '$', image: '../images/hotel2.jpg' },
+                        { id: 3, name: 'Luxury Resort', address: 'Bahir Dar', rating: 4.8, price: '$$$', image: '../images/hotel3.jpg' },
+                        // Add more hotels as needed
+                    ];
+                    
+                    const grid = document.getElementById('hotel-grid');
+                    grid.innerHTML = '';
+                    
+                    hotels.forEach(hotel => {
+                        const card = document.createElement('div');
+                        card.className = 'card';
+                        card.innerHTML = `
+                            <img src="${hotel.image}" alt="${hotel.name}" class="card-img">
+                            <div class="card-body">
+                                <h4 class="card-title">${hotel.name}</h4>
+                                <p class="card-text">${hotel.address} • ${hotel.rating} ⭐ • ${hotel.price}</p>
+                                <button class="btn btn-primary" onclick="selectHotel(${hotel.id}, '${hotel.name}', '${hotel.address}')">Book Now</button>
+                            </div>
+                        `;
+                        grid.appendChild(card);
+                    });
+                    
+                    window.hotelsLoaded = true;
+                }
+                
+                function searchHotels() {
+                    const query = document.getElementById('hotelSearch').value.toLowerCase();
+                    const cards = document.querySelectorAll('#hotel-grid .card');
+                    cards.forEach(card => {
+                        const name = card.querySelector('.card-title').textContent.toLowerCase();
+                        card.style.display = name.includes(query) ? 'block' : 'none';
+                    });
+                }
+                
+                function filterHotels() {
+                    const priceRange = document.getElementById('hotelPriceRange').value;
+                    const rating = parseFloat(document.getElementById('hotelRating').value);
+                    const cards = document.querySelectorAll('#hotel-grid .card');
+                    cards.forEach(card => {
+                        const text = card.querySelector('.card-text').textContent;
+                        const cardPrice = text.split(' • ')[2];
+                        const cardRating = parseFloat(text.split(' • ')[1]);
+                        const priceMatch = !priceRange || cardPrice === priceRange;
+                        const ratingMatch = !rating || cardRating >= rating;
+                        card.style.display = priceMatch && ratingMatch ? 'block' : 'none';
+                    });
+                }
+                
+                function loadMoreHotels() {
+                    // Implement pagination or load more logic
+                    alert('Loading more hotels...');
+                }
+                
+                function selectHotel(id, name, address) {
+                    document.getElementById('selected-hotel-name').textContent = name;
+                    document.getElementById('selected-hotel-address').textContent = address;
+                    document.getElementById('ext-hotel-id').value = id;
+                    document.getElementById('hotel-booking-form').style.display = 'block';
+                    document.getElementById('hotel-booking-form').scrollIntoView({ behavior: 'smooth' });
+                    
+                    // Calculate and display price (mock)
+                    const nights = 1; // Calculate based on dates
+                    const pricePerNight = 100; // Mock price
+                    document.getElementById('hotel-night-price').textContent = `$${pricePerNight}`;
+                    document.getElementById('hotel-total-price').textContent = `$${pricePerNight * nights}`;
+                }
+                
+                function submitHotelBooking() {
+                    const checkIn = document.getElementById('check-in').value;
+                    const checkOut = document.getElementById('check-out').value;
+                    const guests = document.getElementById('hotel-guests').value;
+                    const rooms = document.getElementById('hotel-rooms').value;
+                    const roomType = document.getElementById('room-type').value;
+                    const requests = document.getElementById('hotel-requests').value;
+                    
+                    if (!checkIn || !checkOut) {
+                        alert('Please select check-in and check-out dates.');
+                        return;
+                    }
+                    
+                    // Mock booking submission - replace with actual API call
+                    alert(`Hotel booking confirmed from ${checkIn} to ${checkOut} for ${guests} guests.`);
+                    
+                    // Hide form and refresh bookings
+                    document.getElementById('hotel-booking-form').style.display = 'none';
+                    refreshAllBookings();
+                }
+                
+                function cancelHotelBooking() {
+                    document.getElementById('hotel-booking-form').style.display = 'none';
+                }
+                
+                // Additional helper functions
+                function showBookingTab(type) {
+                    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                    document.querySelectorAll('.booking-tab').forEach(tab => tab.style.display = 'none');
+                    
+                    document.querySelector(`.tab-btn:nth-child(${type === 'taxi' ? 1 : type === 'hotel' ? 2 : 3})`).classList.add('active');
+                    document.getElementById(`${type}-bookings`).style.display = 'block';
+                }
+                
+                function refreshAllBookings() {
+                    // Refresh taxi bookings
+                    BookingService.loadUserBookings();
+                    
+                    // Refresh hotel and restaurant bookings (mock)
+                    document.getElementById('hotelBookingList').innerHTML = '<p class="text-center text-gray-400">No hotel bookings yet</p>';
+                    document.getElementById('restaurantBookingList').innerHTML = '<p class="text-center text-gray-400">No restaurant reservations yet</p>';
+                }
+        
+        // ...existing code...
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize date pickers
+            const today = new Date().toISOString().split('T')[0];
+            const dateInputs = ['res-date', 'check-in', 'check-out'];
+            dateInputs.forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.min = today;
+                }
+            });
+            
+            // Set default check-in to tomorrow, check-out to day after
+            const checkIn = document.getElementById('check-in');
+            const checkOut = document.getElementById('check-out');
+            if (checkIn && checkOut) {
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                checkIn.value = tomorrow.toISOString().split('T')[0];
+                
+                const dayAfter = new Date(tomorrow);
+                dayAfter.setDate(dayAfter.getDate() + 1);
+                checkOut.value = dayAfter.toISOString().split('T')[0];
+            }
+        });
+    </script>
 </body>
 </html>

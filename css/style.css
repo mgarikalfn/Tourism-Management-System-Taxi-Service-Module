@@ -581,3 +581,133 @@ a:hover {
         padding: 1rem;
     }
 }
+
+/* ===== SERVICE NAVIGATION ===== */
+.service-nav-tabs {
+    position: sticky;
+    top: 80px;
+    z-index: 90;
+    background: var(--white);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+}
+
+.service-tabs {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.service-tab {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 2rem;
+    background: var(--gray-100);
+    border: none;
+    border-radius: var(--radius-lg);
+    color: var(--secondary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+
+.service-tab:hover {
+    background: var(--gray-200);
+    transform: translateY(-2px);
+}
+
+.service-tab.active {
+    background: var(--primary);
+    color: white;
+    box-shadow: var(--shadow-md);
+}
+
+.service-tab i {
+    font-size: 1.25rem;
+}
+
+/* ===== BOOKING TABS ===== */
+.tabs {
+    display: flex;
+    gap: 0.25rem;
+    border-bottom: 2px solid var(--gray-200);
+    margin-bottom: 1.5rem;
+}
+
+.tab-btn {
+    padding: 0.75rem 1.5rem;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--secondary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tab-btn:hover {
+    color: var(--primary);
+}
+
+.tab-btn.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+.booking-tab {
+    min-height: 200px;
+}
+
+/* ===== MAIN SERVICE SECTION ===== */
+.main-service-section {
+    transition: opacity 0.3s ease;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .service-tabs {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .service-tab {
+        justify-content: center;
+        padding: 0.75rem;
+    }
+    
+    .service-tab span {
+        font-size: 0.875rem;
+    }
+    
+    .tabs {
+        flex-wrap: wrap;
+    }
+    
+    .tab-btn {
+        flex: 1;
+        min-width: 120px;
+        padding: 0.5rem;
+        font-size: 0.875rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .service-tab span {
+        display: none;
+    }
+    
+    .service-tab {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        justify-content: center;
+        padding: 0;
+    }
+    
+    .service-tab i {
+        font-size: 1.5rem;
+    }
+}

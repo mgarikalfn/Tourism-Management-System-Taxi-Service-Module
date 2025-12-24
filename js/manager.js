@@ -1,6 +1,8 @@
 const API_BASE = "http://localhost/taxi_service/api";
 
 class ManagerDashboard {
+    static fleet = [];
+
     // ==========================================
     // BOOKING MANAGEMENT
     // ==========================================
@@ -68,6 +70,7 @@ class ManagerDashboard {
             const data = await response.json();
             
             if (data.success) {
+                this.fleet = data.data; // Crucial for Edit functionality
                 tbody.innerHTML = data.data.map(taxi => `
                     <tr>
                         <td><strong>${taxi.vehicle_type}</strong></td>
@@ -76,12 +79,16 @@ class ManagerDashboard {
                         <td>$${taxi.price_per_km}</td>
                         <td>
                             <span class="badge ${taxi.is_available ? 'bg-success' : 'bg-danger'}">
-                                ${taxi.is_available ? 'Available' : 'NotAvailable'}
+                                ${taxi.is_available ? 'Available' : 'Offline'}
                             </span>
                         </td>
                         <td>
-                            <button class="btn-sm" onclick="ManagerDashboard.openEditTaxiModal(${taxi.id})">Edit</button>
-                            <button class="btn-sm btn-danger" onclick="ManagerDashboard.deleteTaxi(${taxi.id})">Delete</button>
+                            <button class="btn-sm" onclick="ManagerDashboard.openEditTaxiModal(${taxi.id})">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn-sm btn-danger" onclick="ManagerDashboard.deleteTaxi(${taxi.id})">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
                         </td>
                     </tr>
                 `).join('');
@@ -91,173 +98,94 @@ class ManagerDashboard {
         }
     }
 
-    static async createTaxi() {
-        const taxi = {
+    // MODAL CONTROL
+    static openAddTaxiModal() {
+        this.resetModal();
+        document.getElementById('modal-title').innerText = "Add New Taxi";
+        this.toggleModal(true);
+    }
+
+    static openEditTaxiModal(taxiId) {
+        const taxi = this.fleet.find(t => t.id == taxiId);
+        if (!taxi) return alert('Taxi details not found. Try refreshing.');
+
+        document.getElementById('edit-taxi-id').value = taxi.id;
+        document.getElementById('taxi-type').value = taxi.vehicle_type;
+        document.getElementById('taxi-plate').value = taxi.plate_number;
+        document.getElementById('taxi-driver').value = taxi.driver_name;
+        document.getElementById('taxi-price').value = taxi.price_per_km;
+        
+        document.getElementById('modal-title').innerText = "Edit Taxi Info";
+        this.toggleModal(true);
+    }
+
+    static toggleModal(show) {
+        const modal = document.getElementById('taxi-modal');
+        if (show) {
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+        } else {
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+        }
+    }
+
+    static resetModal() {
+        document.getElementById('edit-taxi-id').value = '';
+        document.getElementById('taxi-type').value = '';
+        document.getElementById('taxi-plate').value = '';
+        document.getElementById('taxi-driver').value = '';
+        document.getElementById('taxi-price').value = '';
+    }
+
+    static async saveTaxi() {
+        const id = document.getElementById('edit-taxi-id').value;
+        const taxiData = {
+            id: id ? parseInt(id) : null,
             vehicle_type: document.getElementById('taxi-type').value,
             plate_number: document.getElementById('taxi-plate').value,
             driver_name: document.getElementById('taxi-driver').value,
             price_per_km: parseFloat(document.getElementById('taxi-price').value)
         };
 
-        
-        
-        if(!taxi.vehicle_type || !taxi.plate_number || !taxi.driver_name){
-            alert("All fields are required");
-            return;
-        }
+        const endpoint = id ? 'update_taxi.php' : 'create_taxi.php';
 
-        
         try {
-            const response = await fetch(`${API_BASE}/taxi/create_taxi.php`, {
-                method:'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(taxi)
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Create failed');
-            } 
-            alert("Taxi created successfully");
-            closeTaxiModal();
-            ManagerDashboard.loadFleet();
-        } catch (error) {
-            console.error('Save error:', error);
-        }
-    }
-
-    static async updateTaxi() {
-    const id = document.getElementById('edit-taxi-id').value;
-
-    const taxi = {
-        id: parseInt(id),
-        vehicle_type: document.getElementById('taxi-type').value.trim(),
-        plate_number: document.getElementById('taxi-plate').value.trim(),
-        driver_name: document.getElementById('taxi-driver').value.trim(),
-        price_per_km: parseFloat(document.getElementById('taxi-price').value)
-    };
-
-    // ✅ Proper validation
-    if (
-        !taxi.id ||
-        !taxi.vehicle_type ||
-        !taxi.plate_number ||
-        !taxi.driver_name ||
-        isNaN(taxi.price_per_km)
-    ) {
-        alert("All fields are required");
-        return;
-    }
-
-    try {
-        const response = await fetch(`${API_BASE}/taxi/update_taxi.php`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(taxi)
-        });
-
-        const data = await response.json();
-
-        if (!response.ok || !data.success) {
-            throw new Error(data.message || "Update failed");
-        }
-
-        alert("Taxi updated successfully");
-
-        closeTaxiModal();
-        this.loadFleet();
-
-    } catch (error) {
-        console.error("Update error:", error);
-        alert("Failed to update taxi");
-    }
-}
-
-
-    static async deleteTaxi(id) {
-        if (!confirm("Delete this taxi? If there are active bookings, it will be marked 'Offline' instead.")) return;
-        try {
-            const response = await fetch(`${API_BASE}/taxi/delete_taxi.php`, {
+            const response = await fetch(`${API_BASE}/taxi/${endpoint}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: id })
+                body: JSON.stringify(taxiData)
             });
             const data = await response.json();
             if (data.success) {
-                alert(data.message);
+                alert(id ? "Updated successfully" : "Created successfully");
+                this.toggleModal(false);
                 this.loadFleet();
+            } else {
+                alert(data.message);
             }
-        } catch (error) {
-            console.error('Delete error:', error);
-        }
+        } catch (err) { console.error(err); }
     }
-static saveTaxi() {
-    const id = document.getElementById('edit-taxi-id').value;
 
-    if (id) {
-        this.updateTaxi();
-    } else {
-        this.createTaxi();
-    }
-}
-
-   
-}
-
-function openCreateTaxiModal() {
-    document.getElementById('modal-title').textContent = "Add Taxi";
-    document.getElementById('edit-taxi-id').value = "";
-    document.getElementById('taxi-type').value = "";
-    document.getElementById('taxi-plate').value = "";
-    document.getElementById('taxi-driver').value = "";
-    document.getElementById('taxi-price').value = "";
-
-    document.getElementById('taxi-modal').style.display = "flex";
-}
-
-function openEditTaxiModal(taxiId) {
-    // Find the taxi from loaded fleet
-    const taxi = this.fleet.find(t => t.id === taxiId);
-    if (!taxi) return alert("Taxi not found");
-
-    // Populate edit modal
-    document.getElementById('edit-taxi-id').value = taxi.id;
-    document.getElementById('edit-taxi-type').value = taxi.vehicle_type;
-    document.getElementById('edit-taxi-plate').value = taxi.plate_number;
-    document.getElementById('edit-taxi-driver').value = taxi.driver_name;
-    document.getElementById('edit-taxi-price').value = taxi.price_per_km;
-
-    // Open edit modal
-    document.getElementById('edit-taxi-modal').classList.remove('hidden');
-}
-
-
-function submitTaxiForm() {
-    const id = document.getElementById('edit-taxi-id').value;
-
-    if (id) {
-        TaxiUpdateService.updateTaxi();
-    } else {
-        TaxiCreateService.createTaxi();
+    static async deleteTaxi(id) {
+        if (!confirm("Delete this vehicle?")) return;
+        const response = await fetch(`${API_BASE}/taxi/delete_taxi.php`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id })
+        });
+        const data = await response.json();
+        if (data.success) this.loadFleet();
     }
 }
 
+// Remove or update the global openTaxiModal if not needed elsewhere
+// If keeping, ensure it resets fields:
 function openTaxiModal() {
+    ManagerDashboard.resetModal(); // Add this to reset fields
+    document.getElementById('edit-taxi-id').value = '';
+    document.getElementById('modal-title').innerText = "Add New Taxi";
     document.getElementById('taxi-modal').style.display = 'flex';
 }
 
-function closeTaxiModal() {
-    document.getElementById('taxi-modal').style.display = 'none';
-
-    // reset form
-    document.getElementById('edit-taxi-id').value = '';
-    document.getElementById('taxi-type').value = '';
-    document.getElementById('taxi-plate').value = '';
-    document.getElementById('taxi-driver').value = '';
-    document.getElementById('taxi-price').value = '';
-}
-
-
-// Make globally accessible
 window.ManagerDashboard = ManagerDashboard;

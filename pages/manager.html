@@ -18,7 +18,7 @@
                 <a href="tourist.html" class="nav-link"><i class="fas fa-home"></i> Tourist View</a>
                 <div class="user-info">
                     <span id="userEmail" class="badge"></span>
-                    <button class="btn btn-danger btn-sm" onclick="logout()">Logout</button>
+                    <button class="btn btn-danger btn-sm" onclick="SessionManager.logout()">Logout</button>
                 </div>
             </div>
         </div>
@@ -32,7 +32,7 @@
                     <h3 class="card-title"><i class="fas fa-car-side"></i> Fleet Management</h3>
                     <p class="card-subtitle">Add, Update or Remove vehicles from your fleet</p>
                 </div>
-                <button class="btn btn-success" onclick="openTaxiModal()">
+                <button class="btn btn-success" onclick="ManagerDashboard.openAddTaxiModal()">
                     <i class="fas fa-plus"></i> Add New Taxi
                 </button>
             </div>
@@ -103,7 +103,7 @@
             </div>
 
             <div style="display:flex; gap:10px;">
-                <button class="btn btn-primary btn-full" onclick="ManagerDashboard.createTaxi()">Save Vehicle</button>
+                <button class="btn btn-primary btn-full" onclick="ManagerDashboard.saveTaxi()">Save Vehicle</button>
                 <button class="btn btn-secondary" onclick="closeTaxiModal()">Cancel</button>
             </div>
         </div>

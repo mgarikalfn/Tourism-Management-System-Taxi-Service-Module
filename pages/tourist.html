@@ -476,8 +476,6 @@
             document.getElementById('hotel-booking-form').style.display = 'none';
         }
         
-                // ...existing code...
-        
                 // Restaurant Management Functions
                 function showRestaurantDiscovery() {
                     document.getElementById('restaurant-discovery').style.display = 'block';
@@ -698,8 +696,6 @@
                     document.getElementById('restaurantBookingList').innerHTML = '<p class="text-center text-gray-400">No restaurant reservations yet</p>';
                 }
         
-        // ...existing code...
-        
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize date pickers
@@ -723,6 +719,12 @@
                 const dayAfter = new Date(tomorrow);
                 dayAfter.setDate(dayAfter.getDate() + 1);
                 checkOut.value = dayAfter.toISOString().split('T')[0];
+            }
+            
+            // Show dashboard button for managers
+            if (SessionManager.getCurrentUser()?.role === 'manager') {
+                document.getElementById('userDashboardBtn').style.display = 'inline-block';
+                document.getElementById('floatingDashboard').style.display = 'block';
             }
         });
     </script>

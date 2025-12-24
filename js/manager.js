@@ -115,6 +115,7 @@ class ManagerDashboard {
         document.getElementById('taxi-driver').value = taxi.driver_name;
         document.getElementById('taxi-price').value = taxi.price_per_km;
         
+        document.getElementById('taxi-availability').value = taxi.is_available ? 1 : 0;
         document.getElementById('modal-title').innerText = "Edit Taxi Info";
         this.toggleModal(true);
     }
@@ -145,7 +146,8 @@ class ManagerDashboard {
             vehicle_type: document.getElementById('taxi-type').value,
             plate_number: document.getElementById('taxi-plate').value,
             driver_name: document.getElementById('taxi-driver').value,
-            price_per_km: parseFloat(document.getElementById('taxi-price').value)
+            price_per_km: parseFloat(document.getElementById('taxi-price').value),
+            is_available:parseInt(document.getElementById('taxi-availability').value)
         };
 
         const endpoint = id ? 'update_taxi.php' : 'create_taxi.php';

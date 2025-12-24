@@ -187,6 +187,16 @@ class ManagerDashboard {
             alert('An error occurred while deleting the taxi.');
         }
     }
+
+    static async logout() {
+        try {
+            await fetch(`${API_BASE}/auth/logout.php`);
+            window.location.href = 'login.html';
+        } catch (error) {
+            console.error('Logout failed:', error);
+            window.location.href = 'login.html';
+        }
+    }
 }
 
 // Remove or update the global openTaxiModal if not needed elsewhere

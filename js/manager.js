@@ -171,13 +171,21 @@ class ManagerDashboard {
 
     static async deleteTaxi(id) {
         if (!confirm("Delete this vehicle?")) return;
-        const response = await fetch(`${API_BASE}/taxi/delete_taxi.php`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id })
-        });
-        const data = await response.json();
-        if (data.success) this.loadFleet();
+        try {
+            const response = await fetch(`${API_BASE}/taxi/delete_taxi.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            });
+            const data = await response.json();
+            alert(data.message); // Display the message from PHP for both success and failure
+            if (data.success) {
+                this.loadFleet(); // Reload only on success
+            }
+        } catch (error) {
+            console.error('Delete error:', error);
+            alert('An error occurred while deleting the taxi.');
+        }
     }
 }
 

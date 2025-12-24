@@ -12,7 +12,8 @@ $data = json_decode(file_get_contents("php://input"), true);
 $id = $data['id'] ?? 0;
 
 // Only allow manager to delete their own taxis
-$stmt = $conn->prepare("DELETE FROM taxi_listings WHERE id=? AND manager_id=?");
+// Instead of DELETE, we just hide it from the public
+$stmt = $conn->prepare("UPDATE taxi_listings SET is_available = 0 WHERE id=? AND manager_id=?");
 $stmt->bind_param("ii", $id, $_SESSION['user_id']);
 
 if($stmt->execute()){

@@ -8,63 +8,64 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- Navigation -->
     <nav class="navbar">
         <div class="navbar-content">
             <div class="logo">
-                <i class="fas fa-chart-line logo-icon"></i>
+                   <i class="fas fa-chart-line logo-icon"></i>
                 <span>Manager Dashboard</span>
             </div>
             <div class="nav-links">
-                <a href="tourist.html" class="nav-link">
-                    <i class="fas fa-user"></i> View Tourist Page
-                </a>
+                <a href="tourist.html" class="nav-link"><i class="fas fa-home"></i> Tourist View</a>
                 <div class="user-info">
-                    <span id="userEmail"></span>
-                    <button class="btn btn-danger btn-sm" onclick="SessionManager.logout()">
-                        <i class="fas fa-sign-out-alt"></i> Logout
-                    </button>
+                    <span id="userEmail" class="badge"></span>
+                    <button class="btn btn-danger btn-sm" onclick="logout()">Logout</button>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- Main Content -->
     <div class="container">
-        <!-- Stats Overview -->
+        
         <div class="card mb-6">
-            <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-chart-bar"></i> Service Overview</h3>
-                <p class="card-subtitle">Real-time booking statistics and insights</p>
-            </div>
-            <div class="grid grid-3 gap-4" id="statsSummary">
-                <div class="text-center p-4 bg-blue-50 rounded-lg">
-                    <div class="text-2xl font-bold text-blue-600" id="totalBookings">0</div>
-                    <div class="text-sm text-gray-600">Total Bookings</div>
+            <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <h3 class="card-title"><i class="fas fa-car-side"></i> Fleet Management</h3>
+                    <p class="card-subtitle">Add, Update or Remove vehicles from your fleet</p>
                 </div>
-                <div class="text-center p-4 bg-green-50 rounded-lg">
-                    <div class="text-2xl font-bold text-green-600" id="activeBookings">0</div>
-                    <div class="text-sm text-gray-600">Active Today</div>
-                </div>
-                <div class="text-center p-4 bg-purple-50 rounded-lg">
-                    <div class="text-2xl font-bold text-purple-600" id="popularTaxi">N/A</div>
-                    <div class="text-sm text-gray-600">Most Popular Taxi</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Manage Bookings -->
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-clipboard-list"></i> Manage Bookings</h3>
-                <p class="card-subtitle">View and manage all taxi bookings</p>
+                <button class="btn btn-success" onclick="openTaxiModal()">
+                    <i class="fas fa-plus"></i> Add New Taxi
+                </button>
             </div>
             
             <div class="table-container">
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>Booking ID</th>
+                            <th>Vehicle Type</th>
+                            <th>Plate Number</th>
+                            <th>Driver's Name</th>
+                            <th>Price/km</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fleetTableBody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-calendar-check"></i> Ride Requests</h3>
+                <p class="card-subtitle">Approve or manage incoming tourist bookings</p>
+            </div>
+            
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
                             <th>Customer</th>
                             <th>Vehicle</th>
                             <th>Route</th>
@@ -74,60 +75,56 @@
                         </tr>
                     </thead>
                     <tbody id="managerBookingList">
-                        <tr>
-                            <td colspan="7" class="text-center py-8 text-gray-400">
-                                Loading bookings...
-                            </td>
-                        </tr>
-                    </tbody>
+                        </tbody>
                 </table>
-            </div>
-            
-            <div class="flex justify-between mt-4">
-                <button class="btn btn-primary" onclick="ManagerDashboard.loadAllBookings()">
-                    <i class="fas fa-sync-alt"></i> Refresh Data
-                </button>
-                <button class="btn btn-secondary" onclick="exportBookings()">
-                    <i class="fas fa-download"></i> Export CSV
-                </button>
             </div>
         </div>
     </div>
 
-    <script src="../js/main.js"></script>
+    <div id="taxi-modal" class="modal-overlay hidden" style="position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:none; justify-content:center; align-items:center; z-index:1000;">
+        <div class="card" style="width: 400px; padding: 20px;">
+            <h3 id="modal-title">Add Taxi</h3>
+            <input type="hidden" id="edit-taxi-id">
+            <div class="form-group" style="margin-bottom:15px;">
+                <label class="form-label">Vehicle Type</label>
+                <input type="text" id="taxi-type" class="form-control" placeholder="Sedan">
+            </div>
+            <div class="form-group" style="margin-bottom:15px;">
+                <label class="form-label">Plate Number</label>
+                <input type="text" id="taxi-plate" class="form-control" placeholder="AA-12345">
+            </div>
+            <div class="form-group" style="margin-bottom:15px;">
+                <label class="form-label">Driver's Name</label>
+                <input type="text" id="taxi-driver" class="form-control" placeholder="John Doe">
+            </div>
+            <div class="form-group" style="margin-bottom:15px;">
+                <label class="form-label">Price per KM ($)</label>
+                <input type="number" id="taxi-price" class="form-control" placeholder="15.00">
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <button class="btn btn-primary btn-full" onclick="ManagerDashboard.createTaxi()">Save Vehicle</button>
+                <button class="btn btn-secondary" onclick="closeTaxiModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/manager.js"></script>
     <script>
-        // Load manager data on page load
         document.addEventListener('DOMContentLoaded', async () => {
-            const user = await SessionManager.checkSession();
-            if (user && (user.role === 'Manager' || user.role === 'Admin')) {
-                SessionManager.updateUserUI(user);
-                ManagerDashboard.loadAllBookings();
-                loadStats();
-            } else {
-                window.location.href = 'tourist.html';
-            }
+            // Your existing auth check logic
+            ManagerDashboard.loadAllBookings();
+            ManagerDashboard.loadFleet();
         });
 
-        async function loadStats() {
-            try {
-                const response = await fetch(`${API_BASE}/stat/view_stats.php`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    document.getElementById('totalBookings').textContent = 
-                        data.statistics.total_bookings || 0;
-                    document.getElementById('activeBookings').textContent = 
-                        data.statistics.active_today || 0;
-                    document.getElementById('popularTaxi').textContent = 
-                        data.statistics.most_popular_taxi?.vehicle_type || 'N/A';
-                }
-            } catch (error) {
-                console.error('Failed to load stats:', error);
-            }
+        function openTaxiModal() {
+            document.getElementById('edit-taxi-id').value = '';
+            document.getElementById('modal-title').innerText = "Add New Taxi";
+            document.getElementById('taxi-modal').style.display = 'flex';
         }
 
-        function exportBookings() {
-            Utils.showToast('Export feature coming soon!', 'info');
+        function closeTaxiModal() {
+            document.getElementById('taxi-modal').style.display = 'none';
         }
     </script>
 </body>

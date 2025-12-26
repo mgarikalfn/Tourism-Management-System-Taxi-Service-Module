@@ -13,7 +13,8 @@ $data = json_decode(file_get_contents("php://input"), true);
 $taxi_id = $data['taxi_id'] ?? 0;
 $pickup = $data['pickup_location'] ?? '';
 $dropoff = $data['dropoff_location'] ?? '';
-$pickup_time = $data['pickup_time'] ?? ''; // New field
+$pickup_time = $data['pickup_time'] ?? '';
+$noofseat = $data['no_of_seats'] ?? 1; // New field
 
 if ($taxi_id <= 0 || empty($pickup) || empty($dropoff) || empty($pickup_time)) {
     echo json_encode(["success" => false, "message" => "All fields including Date/Time are required"]);

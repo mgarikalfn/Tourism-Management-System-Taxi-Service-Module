@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile | Tourist Gateway</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="logo">
+                <i class="fas fa-globe-africa logo-icon"></i>
+                <span>Tourist Gateway</span>
+            </div>
+            <div class="nav-links">
+                <a href="tourist.html" class="nav-link"><i class="fas fa-taxi"></i> Taxis</a>
+                <a href="#" class="nav-link" onclick="showHotelDiscovery()"><i class="fas fa-hotel"></i> Hotels</a>
+                <a href="#" class="nav-link" onclick="showRestaurantDiscovery()"><i class="fas fa-utensils"></i> Restaurants</a>
+
+                <!-- User Dropdown -->
+                <div class="user-dropdown-container">
+                    <button type="button" id="userButton" class="user-button">
+                        <i class="fas fa-user"></i>
+                        <span id="userNameText">Guest</span>
+                        <i class="fas fa-caret-down caret"></i>
+                    </button>
+
+                    <div id="userDropdown" class="user-dropdown-list">
+                        
+                        <a href="#" class="dropdown-link logout-link" onclick="SessionManager.logout(); return false;">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Profile Content -->
+    <div class="container" style="margin-top: 40px;">
+        <div class="card" style="max-width: 600px; margin: 0 auto;">
+            <div class="card-header text-center">
+                <div class="profile-avatar">
+                    <i class="fas fa-user-circle" style="font-size: 90px; color: #007bff;"></i>
+                </div>
+                <h2 class="card-title" id="profileName">Loading...</h2>
+                <p class="text-muted" id="profileRole">Loading...</p>
+            </div>
+
+            <div class="card-body">
+                <div class="info-section">
+                    <h3 class="section-title"><i class="fas fa-info-circle"></i> Profile Information</h3>
+                    
+                    <div class="info-row">
+                        <strong><i class="fas fa-user"></i> Full Name:</strong>
+                        <span id="displayName">Loading...</span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <strong><i class="fas fa-envelope"></i> Email:</strong>
+                        <span id="displayEmail">Loading...</span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <strong><i class="fas fa-shield-alt"></i> Role:</strong>
+                        <span id="displayRole">Loading...</span>
+                    </div>
+                </div>
+
+                <div class="text-center mt-5">
+                    <button class="btn btn-danger" onclick="SessionManager.logout(); return false;">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load SessionManager -->
+    <script src="../js/auth.js"></script>
+
+    <!-- Dropdown + Load Profile Data -->
+    <script>
+        // Dropdown toggle
+        document.getElementById('userButton').addEventListener('click', function(e) {
+            e.stopPropagation();
+            document.getElementById('userDropdown').classList.toggle('show');
+        });
+        document.addEventListener('click', function() {
+            document.getElementById('userDropdown').classList.remove('show');
+        });
+
+        // Load user data
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentUser = SessionManager.getCurrentUser();
+
+            if (!currentUser) {
+                alert("Not logged in");
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Navbar
+            document.getElementById('userNameText').textContent = 
+                currentUser.name || currentUser.email.split('@')[0] || 'User';
+
+            // Profile page
+            document.getElementById('profileName').textContent = currentUser.name || 'User';
+            document.getElementById('profileRole').textContent = `Role: ${currentUser.role || 'User'}`;
+            document.getElementById('displayName').textContent = currentUser.name || 'Not set';
+            document.getElementById('displayEmail').textContent = currentUser.email || 'No email';
+            document.getElementById('displayRole').textContent = currentUser.role || 'User';
+        });
+    </script>
+</body>
+</html>

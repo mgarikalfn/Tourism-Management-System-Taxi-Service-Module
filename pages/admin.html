@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard | Tourist Gateway</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="navbar-content">
+        <div class="logo">
+          <i class="fas fa-shield-alt logo-icon"></i>
+          <span>Admin Dashboard</span>
+        </div>
+        <div class="nav-links">
+          <a href="tourist.html" class="nav-link">
+            <i class="fas fa-home"></i> Tourist View
+          </a>
+          <div class="user-info">
+            <span id="userEmail" class="badge"></span>
+            <button
+              class="btn btn-danger btn-sm"
+              onclick="AdminDashboard.logout()"
+            >
+              <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+    
+    <div class="container">
+      <!-- Global Stats Cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-car-side"></i></div>
+          <div class="stat-info">
+            <h3 id="totalTaxis">0</h3>
+            <p>Total Taxis</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-ticket-alt"></i></div>
+          <div class="stat-info">
+            <h3 id="totalBookings">0</h3>
+            <p>Total Bookings</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-users"></i></div>
+          <div class="stat-info">
+            <h3 id="totalUsers">0</h3>
+            <p>Total Users</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
+          <div class="stat-info">
+            <h3 id="totalRevenue">$0</h3>
+            <p>Estimated Revenue</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fleet Overview (Global - Read Only) -->
+      <div class="card mb-6">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="fas fa-car-side"></i> Current Fleet Overview
+          </h3>
+          <p class="card-subtitle">All registered taxis across all managers</p>
+        </div>
+
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Vehicle Type</th>
+                <th>Plate Number</th>
+                <th>Driver's Name</th>
+                <th>Price/km</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="adminFleetTableBody">
+              <tr><td colspan="5" class="text-center">Loading fleet...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- All Ride Requests (Global View) -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="fas fa-calendar-check"></i> All Ride Requests
+          </h3>
+          <p class="card-subtitle">Global view of all customer bookings</p>
+        </div>
+
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Customer</th>
+                <th>Vehicle</th>
+                <th>Route</th>
+                <th>Scheduled Time</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="adminBookingList">
+              <tr><td colspan="6" class="text-center">Loading bookings...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Load Admin JS -->
+    <script src="../js/admin.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        AdminDashboard.loadFleetOverview();
+        AdminDashboard.loadAllBookings();
+        AdminDashboard.loadGlobalStats();
+      });
+      
+    </script>
+  </body>
+</html>

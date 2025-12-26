@@ -711,3 +711,151 @@ a:hover {
         font-size: 1.5rem;
     }
 }
+/* Horizontal Stats Grid */
+.stats-grid {
+  display: flex;
+  flex-wrap: wrap;           /* Allows wrapping on small screens */
+  gap: 20px;                 /* Space between cards */
+  justify-content: center;  /* Centers the cards horizontally */
+  margin: 30px 0;
+  padding: 0 10px;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  padding: 25px;
+  text-align: center;
+  flex: 1;                   /* Makes cards grow equally */
+  min-width: 200px;          /* Minimum width before wrapping */
+  max-width: 260px;          /* Optional: limit max width */
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+}
+
+.stat-icon {
+  font-size: 3rem;
+  color: #007bff;
+  margin-bottom: 15px;
+}
+
+.stat-info h3 {
+  font-size: 2.2rem;
+  margin: 10px 0;
+  color: #333;
+  font-weight: bold;
+}
+
+.stat-info p {
+  color: #666;
+  margin: 0;
+  font-size: 1rem;
+}
+
+
+@media (max-width: 992px) {
+  .stats-grid {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .stat-card {
+    max-width: 400px;
+    width: 100%;
+  }
+}
+.user-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;                  /* Space between icon and text */
+    font-size: 1rem;
+    color: #333;
+    background: #f8f9fa;
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid #ddd;
+}
+
+.user-badge i {
+    font-size: 1.2rem;
+    color: #007bff;
+}
+
+#userEmailText {
+    font-weight: 500;
+}
+.user-dropdown-container {
+    position: relative;
+    display: inline-block;
+}
+
+/* The clickable button */
+.user-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: #f0f0f0;
+    border: 1px solid #ccc;
+    padding: 10px 16px;
+    border-radius: 30px;
+    font-size: 1rem;
+    color: #333;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.user-button:hover {
+    background: #e0e0e0;
+}
+
+.caret {
+    font-size: 0.8rem;
+    margin-left: 6px;
+}
+
+/* Dropdown - HIDDEN by default */
+.user-dropdown-list {
+    display: none; /* This hides it until clicked */
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background: white;
+    min-width: 200px;
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    margin-top: 8px;
+    z-index: 1000;
+}
+
+/* Show dropdown when 'show' class is added */
+.user-dropdown-list.show {
+    display: block;
+}
+
+/* Dropdown options */
+.dropdown-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    color: #333;
+    text-decoration: none;
+    font-size: 0.95rem;
+}
+
+.dropdown-link:hover {
+    background: #f5f5f5;
+}
+
+.logout-link {
+    color: #dc3545 !important;
+}
+
+.logout-link:hover {
+    background: #ffe5e5;
+}

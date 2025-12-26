@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost/taxi_service/api";
+const API_BASE = "http://localhost/Tourism_management_system/Tourism-Management-System-Taxi-Service-Module/api";
 
 class ManagerDashboard {
     static fleet = [];

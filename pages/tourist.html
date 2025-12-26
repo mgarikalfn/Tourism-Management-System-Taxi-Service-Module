@@ -22,22 +22,25 @@
                 
                 <!-- Dashboard link will be inserted here for managers/admins -->
                 
-                <div class="user-info">
-                    <span id="userEmail" class="user-badge">
-                        <i class="fas fa-user"></i>
-                        <span id="userEmailText"></span>
-                    </span>
-                    
-                    <!-- Dashboard button in user info (alternative) -->
-                    <button id="userDashboardBtn" class="btn btn-warning btn-sm" style="display: none;" 
-                            onclick="window.location.href='manager.html'" title="Go to Manager Dashboard">
-                        <i class="fas fa-chart-line"></i>
-                    </button>
-                    
-                    <button class="btn btn-danger btn-sm" onclick="SessionManager.logout()">
-                        <i class="fas fa-sign-out-alt"></i> Logout
-                    </button>
-                </div>
+               <!-- User Button with Hidden Dropdown -->
+<div class="user-dropdown-container">
+    <!-- The Single Clickable Button (icon + name) -->
+    <button type="button" id="userButton" class="user-button">
+        <i class="fas fa-user"></i>
+        <span id="userNameText">Guest</span>
+        <i class="fas fa-caret-down caret"></i>
+    </button>
+
+    <!-- Dropdown (HIDDEN by default) -->
+    <div id="userDropdown" class="user-dropdown-list">
+        <a href="profile.html" class="dropdown-link">
+            <i class="fas fa-user-edit"></i> Profile
+        </a>
+        <a href="#" class="dropdown-link logout-link" onclick="SessionManager.logout(); return false;">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+    </div>
+</div>
             </div>
         </div>
     </nav>
@@ -48,12 +51,6 @@
             <h1>Explore Ethiopia with Ease</h1>
             <p>Your one-stop destination for seamless travel experiences across Ethiopia</p>
             <div class="flex justify-center gap-3 mt-4">
-                <button class="btn btn-outline" onclick="TaxiService.loadTaxis()">
-                    <i class="fas fa-sync-alt"></i> Refresh Taxis
-                </button>
-                <button class="btn btn-secondary" onclick="BookingService.loadUserBookings()">
-                    <i class="fas fa-history"></i> View History
-                </button>
             </div>
         </div>
     </section>
@@ -115,6 +112,10 @@
                         <div class="form-group">
                             <label class="form-label" for="dropoff"><i class="fas fa-flag-checkered"></i> Drop-off Location</label>
                             <input type="text" id="dropoff" class="form-control" placeholder="Enter destination" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="noofseat"><i class="fas fa-user-friends"></i> Number of Seats</label>
+                            <input type="number" id="noofseat" class="form-control" placeholder="Enter number of seats" required>
                         </div>
                         
                         <button id="confirmBtn" class="btn btn-success btn-full" onclick="TaxiService.bookTaxi()" disabled>
@@ -423,7 +424,46 @@
     </div>
     <script src="../js/main.js"></script>
     <script>
+        document.getElementById('userButton').addEventListener('click', function(e) {
+        e.stopPropagation(); // Prevent closing when clicking the button
+        const dropdown = document.getElementById('userDropdown');
+        dropdown.classList.toggle('show');
+    });
+
+    // Click anywhere else → close dropdown
+    document.addEventListener('click', function() {
+        document.getElementById('userDropdown').classList.remove('show');
+    });
+
+    // Load user name when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+        const nameEl = document.getElementById('userNameText');
+        if (!nameEl) return;
+
+        const currentUser = SessionManager.getCurrentUser();
+        if (currentUser && currentUser.name) {
+            nameEl.textContent = currentUser.name;
+        } else if (currentUser && currentUser.email) {
+            nameEl.textContent = currentUser.email.split('@')[0];
+        } else {
+            nameEl.textContent = 'Guest';
+        }
+    });
         // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+        const userTextEl = document.getElementById('userNameText');
+        if (!userTextEl) return;
+
+        // Try to get from localStorage (after login)
+        const savedUser = localStorage.getItem('currentUser');
+        if (savedUser) {
+            const user = JSON.parse(savedUser);
+            const displayName = user.name || user.email.split('@')[0] || 'User';
+            userTextEl.textContent = displayName;
+        } else {
+            userTextEl.textContent = 'Guest';
+        }
+    });
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize date pickers
             const today = new Date().toISOString().split('T')[0];
@@ -454,6 +494,8 @@
                 document.getElementById('floatingDashboard').style.display = 'block';
             }
         });
+        TaxiService.loadTaxis();
+        refreshAllBookings()
     </script>
 </body>
 </html>

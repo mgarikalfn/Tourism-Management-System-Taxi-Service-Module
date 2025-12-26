@@ -1,5 +1,5 @@
 // API Configuration
-const API_BASE = "http://localhost/taxi_service/api";
+const API_BASE = "http://localhost/Tourism_management_system/Tourism-Management-System-Taxi-Service-Module/api";
 
 // Common Utilities
 const Utils = {
@@ -106,6 +106,7 @@ class TaxiService {
         const pickupTime = document.getElementById('pickup_time').value;
         const pickup = document.getElementById('pickup').value;
         const dropoff = document.getElementById('dropoff').value;
+        const noofseat = document.getElementById('noofseat').value;
         
         if (!taxiId || !pickupTime || !pickup || !dropoff) {
             alert('Please fill in all travel details');
@@ -116,7 +117,8 @@ class TaxiService {
             taxi_id: taxiId,
             pickup_time: pickupTime,
             pickup_location: pickup,
-            dropoff_location: dropoff
+            dropoff_location: dropoff,
+            no_of_seats: noofseat
         };
         
         try {
@@ -138,6 +140,7 @@ class TaxiService {
                 document.getElementById('pickup').value = '';
                 document.getElementById('dropoff').value = '';
                 document.getElementById('pickup_time').value = '';
+                document.getElementById('noofseat').value = '1';
                 
                 // Refresh data
                 this.loadTaxis();
